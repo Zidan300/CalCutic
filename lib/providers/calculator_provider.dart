@@ -1,95 +1,115 @@
-import 'package:get/get.dart';
-import 'package:math_expressions/math_expressions.dart';
-import 'package:financial_calculator/history/history_manager.dart';
-import 'package:financial_calculator/models/history_model.dart';
+import 'package:flutter/foundation.dart';
 
-// This provider has been simplified to handle only basic arithmetic.
-class CalculatorProvider extends GetxController {
-  final HistoryManager _historyManager = HistoryManager();
-  final Parser _parser = Parser();
-
-  final _expression = '0'.obs;
-  final _result = '0'.obs;
-  final _history = <HistoryModel>[].obs;
+class CalculatorProvider extends ChangeNotifier {
+  String _expression = '0';
+  String _result = '0';
   bool _isResultComputed = false;
 
-  String get expression => _expression.value;
-  String get result => _result.value;
-  List<HistoryModel> get history => _history;
+  String get expression => _expression;
+  String get result => _result;
 
-  @override
-  void onInit() {
-    super.onInit();
-    _loadHistory();
-  }
-
-  void _loadHistory() async {
-    _history.value = await _historyManager.loadHistory();
-  }
-
-  // Handles all basic calculator button presses.
   void buttonPressed(String buttonText) {
     if (_isResultComputed) {
       if (['+', '−', '×', '÷', '%'].contains(buttonText)) {
-        _expression.value = _result.value;
+        _expression = _result;
       } else {
-        _expression.value = '0';
+        _expression = '0';
       }
       _isResultComputed = false;
     }
 
-    if (_expression.value == '0' && buttonText != '.') {
-      _expression.value = '';
+    if (_expression == '0' && buttonText != '.') {
+      _expression = '';
     }
 
-    _expression.value += buttonText;
+    _expression += buttonText;
+    notifyListeners();
   }
 
   void clear() {
-    _expression.value = '0';
-    _result.value = '0';
+    _expression = '0';
+    _result = '0';
     _isResultComputed = false;
+    notifyListeners();
   }
 
   void backspace() {
-    if (_expression.value.isNotEmpty) {
-      if (_expression.value.length == 1) {
-        _expression.value = '0';
+    if (_expression.isNotEmpty) {
+      if (_expression.length == 1) {
+        _expression = '0';
       } else {
-        _expression.value = _expression.value.substring(0, _expression.value.length - 1);
+        _expression = _expression.substring(0, _expression.length - 1);
       }
+      notifyListeners();
     }
   }
 
   void calculate() {
-    if (_expression.value.isEmpty) return;
+    if (_expression.isEmpty) return;
 
     try {
-      String finalExpression = _expression.value
+      String finalExpression = _expression
           .replaceAll('×', '*')
           .replaceAll('÷', '/')
-          .replaceAll('−', '-')
-          .replaceAll('%', '*0.01'); // Correctly handle percentage
+          .replaceAll('−', '-');
 
-      Expression exp = _parser.parse(finalExpression);
-      double eval = exp.evaluate(EvaluationType.REAL, ContextModel());
+      if (finalExpression.contains('%')) {
+        finalExpression = finalExpression.replaceAll('%', '/100');
+      }
+      
+      List<String> tokens = _tokenize(finalExpression);
+      double eval = _evaluate(tokens);
 
-      _result.value = _formatResult(eval);
+      _result = _formatResult(eval);
       _isResultComputed = true;
 
-      if (_result.value != 'Error') {
-        final historyItem = HistoryModel(
-          expression: _expression.value,
-          result: _result.value,
-          timestamp: DateTime.now(),
-        );
-        _historyManager.addToHistory(historyItem);
-        _history.insert(0, historyItem);
-      }
     } catch (e) {
-      _result.value = 'Error';
+      _result = 'Error';
       _isResultComputed = true;
     }
+    notifyListeners();
+  }
+
+  List<String> _tokenize(String expression) {
+    // Add spaces around operators to make splitting easier
+    expression = expression.replaceAllMapped(RegExp(r'([*\/+-])'), (match) => ' ${match.group(0)} ');
+    return expression.split(' ').where((s) => s.isNotEmpty).toList();
+  }
+
+  double _evaluate(List<String> tokens) {
+    List<double> values = [];
+    List<String> ops = [];
+
+    for (int i = 0; i < tokens.length; i++) {
+      if (i.isEven) {
+        values.add(double.parse(tokens[i]));
+      } else {
+        ops.add(tokens[i]);
+      }
+    }
+
+    // Perform multiplication and division first
+    for (int i = 0; i < ops.length; i++) {
+      if (ops[i] == '*' || ops[i] == '/') {
+        double result = ops[i] == '*' ? values[i] * values[i+1] : values[i] / values[i+1];
+        values[i] = result;
+        values.removeAt(i+1);
+        ops.removeAt(i);
+        i--;
+      }
+    }
+
+    // Perform addition and subtraction
+    double result = values[0];
+    for (int i = 0; i < ops.length; i++) {
+      if (ops[i] == '+') {
+        result += values[i+1];
+      } else if (ops[i] == '-') {
+        result -= values[i+1];
+      }
+    }
+
+    return result;
   }
 
   String _formatResult(double value) {
