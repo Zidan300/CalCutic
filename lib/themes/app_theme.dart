@@ -13,6 +13,7 @@ class AppTheme {
   static const Color _cardLight = Color(0xFFFFFFFF);
   static const Color _cardDark = Color(0xFF1E1E1E);
   static const Color _errorRed = Color(0xFFD32F2F);
+  static const Color _lightTextColor = Colors.black87; // Defined for light theme text
 
   static ThemeData lightTheme() {
     return ThemeData(
@@ -24,7 +25,7 @@ class AppTheme {
       // Premium AppBar with gradient and elevation
       appBarTheme: const AppBarTheme(
         backgroundColor: _cardLight,
-        foregroundColor: Color(AppConstants.darkTextColor),
+        foregroundColor: _lightTextColor,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         centerTitle: true,
@@ -51,48 +52,48 @@ class AppTheme {
       // Enhanced Typography Hierarchy
       textTheme: const TextTheme(
         displayLarge: TextStyle(
-          color: Color(AppConstants.darkTextColor),
+          color: _lightTextColor,
           fontSize: 32,
           fontWeight: FontWeight.bold,
           letterSpacing: -0.5,
         ),
         displayMedium: TextStyle(
-          color: Color(AppConstants.darkTextColor),
+          color: _lightTextColor,
           fontSize: 28,
           fontWeight: FontWeight.bold,
           letterSpacing: -0.3,
         ),
         headlineSmall: TextStyle(
-          color: Color(AppConstants.darkTextColor),
+          color: _lightTextColor,
           fontSize: 24,
           fontWeight: FontWeight.bold,
           letterSpacing: 0.2,
         ),
         titleLarge: TextStyle(
-          color: Color(AppConstants.darkTextColor),
+          color: _lightTextColor,
           fontSize: 20,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.15,
         ),
         titleMedium: TextStyle(
-          color: Color(AppConstants.darkTextColor),
+          color: _lightTextColor,
           fontSize: 16,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.15,
         ),
         titleSmall: TextStyle(
-          color: Color(AppConstants.darkTextColor),
+          color: _lightTextColor,
           fontSize: 14,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.1,
         ),
         bodyLarge: TextStyle(
-          color: Color(AppConstants.darkTextColor),
+          color: _lightTextColor,
           fontSize: 16,
           letterSpacing: 0.1,
         ),
         bodyMedium: TextStyle(
-          color: Color(AppConstants.darkTextColor),
+          color: _lightTextColor,
           fontSize: 14,
           letterSpacing: 0.1,
         ),
@@ -102,7 +103,7 @@ class AppTheme {
           letterSpacing: 0.08,
         ),
         labelLarge: TextStyle(
-          color: Color(AppConstants.darkTextColor),
+          color: _lightTextColor,
           fontSize: 14,
           fontWeight: FontWeight.w500,
           letterSpacing: 0.1,
@@ -157,7 +158,7 @@ class AppTheme {
           fontSize: 14,
         ),
         labelStyle: const TextStyle(
-          color: Color(AppConstants.darkTextColor),
+          color: _lightTextColor,
           fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
@@ -171,7 +172,7 @@ class AppTheme {
         
         // Prefix/Suffix styles
         prefixStyle: const TextStyle(
-          color: Color(AppConstants.darkTextColor),
+          color: _lightTextColor,
           fontSize: 14,
           fontWeight: FontWeight.w500,
         ),

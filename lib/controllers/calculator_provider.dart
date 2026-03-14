@@ -3,6 +3,7 @@ import 'package:math_expressions/math_expressions.dart';
 import 'package:financial_calculator/history/history_manager.dart';
 import 'package:financial_calculator/models/history_model.dart';
 
+// This provider is refactored for basic arithmetic and stability.
 class CalculatorProvider extends GetxController {
   final HistoryManager _historyManager = HistoryManager();
   final Parser _parser = Parser();
@@ -20,6 +21,11 @@ class CalculatorProvider extends GetxController {
   void onInit() {
     super.onInit();
     _loadHistory();
+  }
+
+  void clearHistory() {
+    _history.clear();
+    _historyManager.clearHistory(); // Clear history from local storage
   }
 
   void _loadHistory() async {
@@ -50,22 +56,24 @@ class CalculatorProvider extends GetxController {
   }
 
   void backspace() {
-    if (_expression.value.isNotEmpty && _expression.value.length > 1) {
-      _expression.value = _expression.value.substring(0, _expression.value.length - 1);
-    } else {
-      _expression.value = '0';
+    if (_expression.value.isNotEmpty) {
+      if (_expression.value.length == 1 || _expression.value == 'Error') {
+        _expression.value = '0';
+      } else {
+        _expression.value = _expression.value.substring(0, _expression.value.length - 1);
+      }
     }
   }
 
   void calculate() {
-    if (_expression.value.isEmpty) return;
+    if (_expression.value.isEmpty || _expression.value == 'Error') return;
 
     try {
       String finalExpression = _expression.value
           .replaceAll('×', '*')
           .replaceAll('÷', '/')
           .replaceAll('−', '-')
-          .replaceAll('%', '*0.01');
+          .replaceAll('%', '/100');
 
       Expression exp = _parser.parse(finalExpression);
       double eval = exp.evaluate(EvaluationType.REAL, ContextModel());
